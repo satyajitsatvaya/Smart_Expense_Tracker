@@ -10,6 +10,6 @@ public class TestController {
 
     @GetMapping
     public String testJwt() {
-        return "JWT IS WORKING";
+        return "JWT IS WORKING..";
     }
 }
