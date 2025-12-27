@@ -5,6 +5,6 @@ import com.projects.ExpenseTracker.dto.UserRegisterRequest;
 
 public interface UserService {
     void register(UserRegisterRequest request);
-    void login(UserLoginRequest request);
+    String login(UserLoginRequest request);
 
 }

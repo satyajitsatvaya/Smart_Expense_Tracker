@@ -6,6 +6,7 @@ import com.projects.ExpenseTracker.exception.EmailAlreadyExistsException;
 import com.projects.ExpenseTracker.exception.InvalidCredentialsException;
 import com.projects.ExpenseTracker.model.User;
 import com.projects.ExpenseTracker.repository.UserRepository;
+import com.projects.ExpenseTracker.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+
 
     @Override
     public void register(UserRegisterRequest request) {
@@ -33,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    public void login(UserLoginRequest request) {
+    public String login(UserLoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() ->
                         new InvalidCredentialsException("Invalid email or password"));
@@ -43,6 +46,8 @@ public class UserServiceImpl implements UserService {
         if(!passwordMatch){
             throw new InvalidCredentialsException("Invalid email or password");
         }
+
+        return jwtUtil.generateToken(request.getEmail());
     }
 
 
