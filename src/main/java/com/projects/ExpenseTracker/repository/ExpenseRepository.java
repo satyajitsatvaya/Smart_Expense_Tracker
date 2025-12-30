@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +32,29 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
       AND MONTH(e.expenseDate) = :month
 """)
     BigDecimal getMonthlyTotal(User user, int year, int month);
+
+    @Query("""
+    SELECT COALESCE(SUM(e.amount), 0)
+    FROM Expense e
+    WHERE e.user = :user
+      AND e.expenseDate BETWEEN :from AND :to
+""")
+    BigDecimal getTotalBetweenDates( User user, LocalDate from, LocalDate to);
+
+    @Query("""
+    SELECT e.category, COALESCE(SUM(e.amount), 0)
+    FROM Expense e
+    WHERE e.user = :user
+      AND YEAR(e.expenseDate) = :year
+      AND MONTH(e.expenseDate) = :month
+    GROUP BY e.category
+""")
+    List<Object[]> getCategoryWiseMonthlySummary(
+            User user,
+            int year,
+            int month
+    );
+
 
 
 
