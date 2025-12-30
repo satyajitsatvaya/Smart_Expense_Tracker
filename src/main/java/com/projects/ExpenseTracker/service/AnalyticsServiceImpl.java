@@ -30,16 +30,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
         List<Object[]> result= expenseRepository.getCategoryWiseSummary(user);
 
-        Map<String, BigDecimal> summary = new HashMap<>();
-
-        for(Object[] row : result){
-            String category=(String)  row[0];
-            BigDecimal amount=(BigDecimal) row[1];
-            summary.put(category, amount);
-
-        }
-
-        return summary;
+        return getStringBigDecimalMap(result);
     }
 
     @Override
@@ -70,14 +61,17 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
         List<Object[]> results= expenseRepository.getCategoryWiseMonthlySummary(user,year,month);
 
-            Map<String, BigDecimal> summary = new HashMap<>();
+        return getStringBigDecimalMap(results);
+    }
 
-            for(Object[] row : results){
-                String category=(String)  row[0];
-                BigDecimal amount=(BigDecimal) row[1];
-                summary.put(category, amount);
-            }
+    private Map<String, BigDecimal> getStringBigDecimalMap(List<Object[]> result) {
+        Map<String, BigDecimal> summary = new HashMap<>();
 
-            return summary;
+        for(Object[] row : result){
+            String category=(String)  row[0];
+            BigDecimal amount=(BigDecimal) row[1];
+            summary.put(category, amount);
+        }
+        return summary;
     }
 }
