@@ -7,6 +7,7 @@ import com.projects.ExpenseTracker.model.Expense;
 import com.projects.ExpenseTracker.model.User;
 import com.projects.ExpenseTracker.repository.ExpenseRepository;
 import com.projects.ExpenseTracker.repository.UserRepository;
+import com.projects.ExpenseTracker.specification.ExpenseSpecification;
 import com.projects.ExpenseTracker.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -37,11 +41,9 @@ public class ExpenseServiceImpl implements ExpenseService{
         expense.setExpenseDate(request.getExpenseDate());
 
         expense.setUser(user);
-
         expenseRepository.save(expense);
-
-
     }
+
 
     @Override
     public Page<ExpenseResponse> getExpenses(int page, int size) {
@@ -53,6 +55,9 @@ public class ExpenseServiceImpl implements ExpenseService{
         return expenseRepository.findByUser(user,pageable)
                 .map(this::mapToResponse);
     }
+
+    //   Map to Response Generator
+
     private ExpenseResponse mapToResponse(Expense expense) {
 
         ExpenseResponse response = new ExpenseResponse();
@@ -88,7 +93,6 @@ public class ExpenseServiceImpl implements ExpenseService{
             expense.setExpenseDate(request.getExpenseDate());
         }
 
-
         expenseRepository.save(expense);
     }
 
@@ -106,7 +110,22 @@ public class ExpenseServiceImpl implements ExpenseService{
         expenseRepository.delete(expense);
     }
 
+    @Override
+    public Page<ExpenseResponse> getFilteredExpenses(String category, LocalDate from, LocalDate to, BigDecimal minAmount, BigDecimal maxAmount, Pageable pageable) {
+        String email= SecurityUtil.getCurrentUserEmail();
 
+        User user= userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        var specification = ExpenseSpecification.withFilters(
+                user.getId(),
+                category, from , to, minAmount, maxAmount
+        );
+
+        Page<Expense> expenses=expenseRepository.findAll(specification, pageable);
+
+        return expenses.map(this::mapToResponse);
+    }
 
 
 }
