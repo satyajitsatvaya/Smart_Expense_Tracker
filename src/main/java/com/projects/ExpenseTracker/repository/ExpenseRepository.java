@@ -17,8 +17,6 @@ import java.util.Optional;
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpecificationExecutor<Expense> {
 
-    Page<Expense> findByUser(User user, Pageable pageable);
-
     Optional<Expense> findByIdAndUser(Long id, User user);
 
     @Query("SELECT e.category, SUM(e.amount) FROM Expense e WHERE e.user = :user GROUP BY e.category")

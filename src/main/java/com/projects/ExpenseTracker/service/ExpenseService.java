@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 public interface ExpenseService {
     void addExpense(CreateExpenseRequest createExpenseRequest);
-    Page<ExpenseResponse> getExpenses(int page, int size);
+   // Page<ExpenseResponse> getExpenses(int page, int size);
     void updateExpense(Long expenseId, UpdateExpenseRequest request);
     void deleteExpense(Long expenseId);
 

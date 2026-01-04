@@ -1,8 +1,9 @@
-package com.projects.ExpenseTracker.service;
+package com.projects.ExpenseTracker.service.impl;
 
 import com.projects.ExpenseTracker.model.User;
 import com.projects.ExpenseTracker.repository.ExpenseRepository;
 import com.projects.ExpenseTracker.repository.UserRepository;
+import com.projects.ExpenseTracker.service.AnalyticsService;
 import com.projects.ExpenseTracker.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

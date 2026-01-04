@@ -1,4 +1,4 @@
-package com.projects.ExpenseTracker.service;
+package com.projects.ExpenseTracker.service.impl;
 
 import com.projects.ExpenseTracker.dto.UserLoginRequest;
 import com.projects.ExpenseTracker.dto.UserRegisterRequest;
@@ -6,6 +6,7 @@ import com.projects.ExpenseTracker.exception.EmailAlreadyExistsException;
 import com.projects.ExpenseTracker.exception.InvalidCredentialsException;
 import com.projects.ExpenseTracker.model.User;
 import com.projects.ExpenseTracker.repository.UserRepository;
+import com.projects.ExpenseTracker.service.UserService;
 import com.projects.ExpenseTracker.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
