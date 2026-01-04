@@ -21,6 +21,4 @@ public interface BudgetRepository extends JpaRepository<Budget,Long> {
             int month
     );
 
-
-    boolean existsByUserAndCategoryAndYearAndMonth(User user, String category, int year, int month);
 }
