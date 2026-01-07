@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Setter
 public class Budget extends BaseEntity {
 
-    @Column(nullable = false)
+
     private String category;
 
     @Column(name = "budget_year", nullable = false)
@@ -29,4 +29,13 @@ public class Budget extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public boolean isOverallBudget() {
+        return this.category == null;
+    }
+
+    public boolean isCategoryBudget() {
+        return this.category != null;
+    }
+
 }

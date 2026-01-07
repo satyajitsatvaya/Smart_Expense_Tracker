@@ -1,6 +1,7 @@
 package com.projects.ExpenseTracker.controller;
 
 import com.projects.ExpenseTracker.dto.BudgetResponse;
+import com.projects.ExpenseTracker.dto.BudgetUsageResponse;
 import com.projects.ExpenseTracker.dto.CreateBudgetRequest;
 import com.projects.ExpenseTracker.service.BudgetService;
 import jakarta.validation.Valid;
@@ -45,6 +46,16 @@ public class BudgetController {
         return ResponseEntity.ok(
                 budgetService.getBudgetsForMonth(year, month)
         );
+    }
+
+    @GetMapping("/usage")
+    public ResponseEntity<BudgetUsageResponse> getBudgetUsage(
+            @RequestParam(required = false) String category,
+            @RequestParam int year,
+            @RequestParam int month ) {
+
+        return ResponseEntity.ok(
+                budgetService.getMonthlyBudgetUsage(category, year, month) );
     }
 
 }

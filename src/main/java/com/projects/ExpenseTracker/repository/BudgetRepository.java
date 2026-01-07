@@ -1,7 +1,6 @@
 package com.projects.ExpenseTracker.repository;
 
 import com.projects.ExpenseTracker.model.Budget;
-import com.projects.ExpenseTracker.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -14,6 +13,13 @@ public interface BudgetRepository extends JpaRepository<Budget,Long> {
                 int year,
                 int month
         );
+
+    // OVERALL budget (category IS NULL)
+    Optional<Budget> findByUserIdAndCategoryIsNullAndYearAndMonth(
+            Long userId,
+            int year,
+            int month
+    );
 
     List<Budget> findByUserIdAndYearAndMonth(
             Long userId,
