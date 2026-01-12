@@ -14,7 +14,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -102,46 +104,68 @@ public class BudgetServiceImpl implements BudgetService {
                 .toList();
     }
 
+
     @Override
     public BudgetUsageResponse getMonthlyBudgetUsage(String category, int year, int month) {
+
         User user = findCurrentUser();
         Long userId = user.getId();
 
-        Budget budget;
+        boolean isOverallRequest =
+                category == null || category.isBlank() || category.equalsIgnoreCase("OVERALL");
 
-        if(category == null || category.equalsIgnoreCase("OVERALL")) {
-            budget = budgetRepository
-                    .findByUserIdAndCategoryIsNullAndYearAndMonth(
-                            userId, year, month )
-                    .orElseThrow(() -> new RuntimeException("Overall Budget not found"));
+        BigDecimal spentAmount = isOverallRequest
+                ? analyticsService.getMonthlyTotal(year, month)
+                : analyticsService
+                .getCategoryWiseMonthlySummary(year, month)
+                .getOrDefault(category, BigDecimal.ZERO);
 
-        } else {
-            budget = budgetRepository
-                    .findByUserIdAndCategoryAndYearAndMonth(
-                            userId, category, year, month )
-                    .orElseThrow(() -> new RuntimeException("Category Budget not found"));
+
+        Optional<Budget> optionalBudget = isOverallRequest
+                ? budgetRepository.findByUserIdAndCategoryIsNullAndYearAndMonth(userId, year, month)
+                : budgetRepository.findByUserIdAndCategoryIgnoreCaseAndYearAndMonth(
+                userId, category, year, month);
+
+        // No budget exists (but spending may exist)
+        if (!isOverallRequest && optionalBudget.isEmpty()) {
+
+            BudgetUsageResponse response = new BudgetUsageResponse();
+            response.setCategory(category);
+            response.setSpentAmount(spentAmount);
+            response.setBudgetAmount(null);
+            response.setRemainingAmount(null);
+            response.setUsagePercentage(null);
+            response.setOverSpent(false);
+            return response;
         }
 
-        BigDecimal spentAmount;
-        if(budget.isOverallBudget()){
-            spentAmount = analyticsService.getMonthlyTotal(year, month);
-        } else {
-            spentAmount = analyticsService.getCategoryWiseMonthlySummary(year, month)
-                    .getOrDefault(budget.getCategory(), BigDecimal.ZERO);
-        }
+        //  OVERALL budget
+        Budget budget = optionalBudget
+                .orElseThrow(() -> new RuntimeException("Overall budget not found"));
 
-        BigDecimal remaining =
-                budget.getAmount().subtract(spentAmount);
 
+        BigDecimal remaining = budget.getAmount().subtract(spentAmount);
+
+        Integer usagePercentage = budget.getAmount().compareTo(BigDecimal.ZERO) == 0
+                ? null
+                : spentAmount
+                .multiply(BigDecimal.valueOf(100))
+                .divide(budget.getAmount(), 0, RoundingMode.HALF_UP)
+                .intValue();
+
+        boolean overSpent = remaining.compareTo(BigDecimal.ZERO) < 0;
 
         BudgetUsageResponse response = new BudgetUsageResponse();
-        response.setCategory(budget.isOverallBudget() ? "OVERALL" : budget.getCategory());
+        response.setCategory("OVERALL");
         response.setBudgetAmount(budget.getAmount());
         response.setSpentAmount(spentAmount);
         response.setRemainingAmount(remaining);
-        response.setOverSpent(remaining.compareTo(BigDecimal.ZERO) < 0);
+        response.setUsagePercentage(usagePercentage);
+        response.setOverSpent(overSpent);
 
         return response;
     }
+
+
 
 }

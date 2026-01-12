@@ -9,6 +9,7 @@ public class BudgetUsageResponse {
     private BigDecimal budgetAmount;
     private BigDecimal spentAmount;
     private BigDecimal remainingAmount;
+    private Integer usagePercentage;
     private boolean overSpent;
 
 
