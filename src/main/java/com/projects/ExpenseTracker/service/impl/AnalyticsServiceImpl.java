@@ -65,12 +65,37 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         return getStringBigDecimalMap(results);
     }
 
+    @Override
+    public Map<Integer, BigDecimal> getDailySummary(int year, int month) {
+        String email = SecurityUtil.getCurrentUserEmail();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        List<Object[]> results = expenseRepository.getDailySummary(user, year, month);
+
+        Map<Integer, BigDecimal> summary = new HashMap<>();
+        for (Object[] row : results) {
+            Integer day = (Integer) row[0];
+            BigDecimal amount = (BigDecimal) row[1];
+            summary.put(day, amount);
+        }
+        return summary;
+    }
+
     private Map<String, BigDecimal> getStringBigDecimalMap(List<Object[]> result) {
         Map<String, BigDecimal> summary = new HashMap<>();
 
         for(Object[] row : result){
             String category=(String)  row[0];
-            BigDecimal amount=(BigDecimal) row[1];
+            // Safely cast Number to BigDecimal
+            Object val = row[1];
+            BigDecimal amount = BigDecimal.ZERO;
+            if (val instanceof BigDecimal) {
+                amount = (BigDecimal) val;
+            } else if (val instanceof Number) {
+                amount = new BigDecimal(val.toString());
+            }
+
             summary.put(category, amount);
         }
         return summary;

@@ -13,4 +13,6 @@ public interface AnalyticsService {
 
     Map<String,BigDecimal> getCategoryWiseMonthlySummary(int year,int month);
 
+    Map<Integer, BigDecimal> getDailySummary(int year, int month);
+
 }

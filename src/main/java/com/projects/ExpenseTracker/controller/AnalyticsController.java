@@ -65,4 +65,11 @@ public class AnalyticsController {
 
         return ResponseEntity.ok(response);
     }
+
+
+    @GetMapping("/daily")
+    public ResponseEntity<Map<Integer, BigDecimal>> getDailySummary(
+            @RequestParam int year, @RequestParam int month) {
+        return ResponseEntity.ok(analyticsService.getDailySummary(year, month));
+    }
 }
