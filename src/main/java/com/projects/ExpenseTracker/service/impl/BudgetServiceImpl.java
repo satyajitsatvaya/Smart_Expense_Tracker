@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -114,11 +115,18 @@ public class BudgetServiceImpl implements BudgetService {
         boolean isOverallRequest =
                 category == null || category.isBlank() || category.equalsIgnoreCase("OVERALL");
 
-        BigDecimal spentAmount = isOverallRequest
-                ? analyticsService.getMonthlyTotal(year, month)
-                : analyticsService
-                .getCategoryWiseMonthlySummary(year, month)
-                .getOrDefault(category, BigDecimal.ZERO);
+        BigDecimal spentAmount = BigDecimal.ZERO;
+
+        if (isOverallRequest) {
+            spentAmount = analyticsService.getMonthlyTotal(year, month);
+        } else {
+            Map<String, BigDecimal> categoryMap = analyticsService.getCategoryWiseMonthlySummary(year, month);
+            for (Map.Entry<String, BigDecimal> entry : categoryMap.entrySet()) {
+                if (entry.getKey().trim().equalsIgnoreCase(category.trim())) {
+                    spentAmount = spentAmount.add(entry.getValue());
+                }
+            }
+        }
 
 
         Optional<Budget> optionalBudget = isOverallRequest
@@ -156,7 +164,7 @@ public class BudgetServiceImpl implements BudgetService {
         boolean overSpent = remaining.compareTo(BigDecimal.ZERO) < 0;
 
         BudgetUsageResponse response = new BudgetUsageResponse();
-        response.setCategory("OVERALL");
+        response.setCategory(budget.getCategory() == null ? "OVERALL" : budget.getCategory());
         response.setBudgetAmount(budget.getAmount());
         response.setSpentAmount(spentAmount);
         response.setRemainingAmount(remaining);

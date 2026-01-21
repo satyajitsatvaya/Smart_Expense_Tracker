@@ -17,7 +17,9 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
 
     Optional<Expense> findByIdAndUser(Long id, User user);
 
-    @Query("SELECT e.category, SUM(e.amount) FROM Expense e WHERE e.user = :user GROUP BY e.category")
+    @Query("""
+    SELECT e.category, SUM(e.amount) FROM Expense e WHERE e.user = :user GROUP BY e.category
+    """)
     List<Object[]> getCategoryWiseSummary(User user);
 
 
@@ -25,8 +27,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
     SELECT COALESCE(SUM(e.amount), 0)
     FROM Expense e
     WHERE e.user = :user
-      AND YEAR(e.expenseDate) = :year
-      AND MONTH(e.expenseDate) = :month
+      AND EXTRACT(YEAR FROM e.expenseDate) = :year
+      AND EXTRACT(MONTH FROM e.expenseDate) = :month
 """)
     BigDecimal getMonthlyTotal(User user, int year, int month);
 
@@ -42,8 +44,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
     SELECT e.category, COALESCE(SUM(e.amount), 0)
     FROM Expense e
     WHERE e.user = :user
-      AND YEAR(e.expenseDate) = :year
-      AND MONTH(e.expenseDate) = :month
+      AND EXTRACT(YEAR FROM e.expenseDate) = :year
+      AND EXTRACT(MONTH FROM e.expenseDate) = :month
     GROUP BY e.category
 """)
     List<Object[]> getCategoryWiseMonthlySummary(
@@ -51,6 +53,17 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long>, JpaSpec
             int year,
             int month
     );
+
+    @Query("""
+    SELECT EXTRACT(DAY FROM e.expenseDate), COALESCE(SUM(e.amount), 0)
+    FROM Expense e
+    WHERE e.user = :user
+      AND EXTRACT(YEAR FROM e.expenseDate) = :year
+      AND EXTRACT(MONTH FROM e.expenseDate) = :month
+    GROUP BY EXTRACT(DAY FROM e.expenseDate)
+    ORDER BY EXTRACT(DAY FROM e.expenseDate) ASC
+""")
+    List<Object[]> getDailySummary(User user, int year, int month);
 
 
 }
